@@ -1,4 +1,5 @@
-﻿using MoviesApi.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using MoviesApi.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +9,25 @@ namespace MoviesApi.Repositories
 {
     public class BaseRepository<T> : IRepository<T> where T : EntityBase
     {
-        public Task<T> Add(T entity)
+        protected readonly ApplicationDbContext applicationDb;
+
+        public BaseRepository(ApplicationDbContext context)
         {
-            throw new NotImplementedException();
+            applicationDb = context;
+        }
+
+        public virtual async Task<T> Add(T entity)
+        {
+            applicationDb.Set<T>().Add(entity);
+            try
+            {
+                await applicationDb.SaveChangesAsync();
+            }
+            catch
+            {
+                return null;
+            }
+            return entity;
         }
 
         public Task<T> Delete(T entity)
@@ -23,9 +40,9 @@ namespace MoviesApi.Repositories
             throw new NotImplementedException();
         }
 
-        public IQueryable<T> GetAll()
+        public virtual IQueryable<T> GetAll()
         {
-            throw new NotImplementedException();
+            return applicationDb.Set<T>().AsNoTracking();
         }
 
         public Task<T> GetById(int id)
@@ -33,9 +50,9 @@ namespace MoviesApi.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<List<T>> ListAll()
+        public async Task<List<T>> ListAll()
         {
-            throw new NotImplementedException();
+            return await GetAll().ToListAsync();
         }
 
         public Task<T> Update(T entity)
