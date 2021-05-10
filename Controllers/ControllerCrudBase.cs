@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MoviesApi.Entities;
@@ -14,14 +15,17 @@ namespace MoviesApi.Controllers
     public class ControllerCrudBase<T, R> : ControllerBase
         where T:EntityBase
         where R:BaseRepository<T>
+
+        
     {
         protected R repository;
         private readonly ILogger<ControllerCrudBase<T, R>> logger;
+      
 
         public ControllerCrudBase(R repository, ILogger<ControllerCrudBase<T, R>> logger)
         {
             this.repository = repository;
-            this.logger = logger;
+            this.logger = logger;           
         }
 
 
@@ -46,8 +50,22 @@ namespace MoviesApi.Controllers
             return entity;
         }
 
-        //[HttpPut ("{id:int}")]
-        //public virtual async Task<ActionResult<T>> 
+        [HttpPost]
+        public async Task<ActionResult> Post([FromBody] T entity)
+
+        {
+            await repository.Add(entity);
+           
+            return NoContent();
+        }
+
+
+        [HttpPut("{id:int}")]
+        public virtual async Task<ActionResult<T>> Put([FromRoute] int id , [FromBody] T entity)
+        {
+
+            return entity;
+        }
 
 
 
