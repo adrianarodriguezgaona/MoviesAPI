@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MoviesApi.Helpers;
 using MoviesApi.Repositories;
 using System;
 using System.Collections.Generic;
@@ -30,17 +31,20 @@ namespace MoviesApi
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped<GenreRepository>();
+            services.AddScoped<ActorRepository>();
 
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(builder =>
                 {
                     var frontendURL = Configuration.GetValue<string>("frontend_url");
-                    builder.WithOrigins(frontendURL).AllowAnyMethod().AllowAnyHeader();
+                    builder.WithOrigins(frontendURL).AllowAnyMethod().AllowAnyHeader()
+                    .WithExposedHeaders(new string[] {"totalAmountOfRecords"});
                 });
             });
 
             services.AddAutoMapper(typeof(Startup));
+            services.AddScoped<IFileStorageService, AzureStorageService>();
 
             services.AddControllers();
 

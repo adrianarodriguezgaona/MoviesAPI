@@ -15,6 +15,8 @@ namespace MoviesApi.Helpers
             CreateMap<GenreDTO, Genre>().ReverseMap();
             CreateMap<GenreCreationDTO, Genre>().ReverseMap();
 
+            CreateMap<ActorCreationDTO, Actor>().ReverseMap()
+                .ForMember(x => x.Picture, options => options.Ignore());
         }
 
     }

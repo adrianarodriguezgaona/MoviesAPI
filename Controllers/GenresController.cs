@@ -17,18 +17,17 @@ namespace MoviesApi.Controllers
 
     public class GenresController : ControllerCrudBase<Genre, GenreRepository>
     {
-        private readonly IMapper _mapper;
-        public GenresController(GenreRepository genreRepository, ILogger<GenresController> logger, IMapper mapper) : base(genreRepository, logger)
+        public GenresController(GenreRepository genreRepository, ILogger<GenresController> logger) : base(genreRepository, logger)
         {
-            _mapper = mapper;
+            
         }
 
         [HttpPost]
         [Route("PostGenre")]
         public async Task<ActionResult> PostDTO([FromBody] GenreCreationDTO genreCreationDTO)
         {
-            var genre = _mapper.Map<Genre>(genreCreationDTO);
-            await repository.Add(genre);
+            await repository.AddDTO(genreCreationDTO);
+
             return NoContent();
         }
     }

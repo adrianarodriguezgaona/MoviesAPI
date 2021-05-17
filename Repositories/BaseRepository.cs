@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MoviesApi.DTOs;
 using MoviesApi.Entities;
+using MoviesApi.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,14 +32,28 @@ namespace MoviesApi.Repositories
             return entity;
         }
 
-        public Task<T> Delete(T entity)
+        public async Task<T> Delete(T entity)
         {
-            throw new NotImplementedException();
+            applicationDb.Set<T>().Remove(entity);
+            try
+            {
+                await applicationDb.SaveChangesAsync();
+            }
+            catch
+            {
+                return null;
+            }
+            return entity;
         }
 
-        public Task<T> Delete(int id)
+        public async Task<T> Delete(int id)
         {
-            throw new NotImplementedException();
+            var entity = await GetById(id);
+            if (entity == null)
+            {
+                return null;
+            }
+            return await Delete(entity);
         }
 
         public virtual IQueryable<T> GetAll()
@@ -45,19 +61,34 @@ namespace MoviesApi.Repositories
             return applicationDb.Set<T>().AsNoTracking();
         }
 
-        public Task<T> GetById(int id)
+        public async  Task<T> GetById(int id)
         {
-            throw new NotImplementedException();
+           return await applicationDb.Set<T>().FirstOrDefaultAsync(t => t.Id == id);           
+        }
+
+        public async Task<List<T>> ListAll(PaginationDTO paginationDTO)
+        {
+            return await GetAll().OrderBy(e => e.Name).Paginate(paginationDTO).ToListAsync();
         }
 
         public async Task<List<T>> ListAll()
         {
-            return await GetAll().ToListAsync();
+            return await GetAll().OrderBy(e => e.Name).ToListAsync();
         }
 
-        public Task<T> Update(T entity)
+        public async Task<T> Update(T entity)
         {
-            throw new NotImplementedException();
+            applicationDb.Entry(entity).State = EntityState.Modified;
+            try
+            {
+                await applicationDb.SaveChangesAsync();
+            }
+            catch
+            {
+                return null;
+            }
+
+            return entity;
         }
     }
 }

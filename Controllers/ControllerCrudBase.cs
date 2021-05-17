@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MoviesApi.DTOs;
 using MoviesApi.Entities;
+using MoviesApi.Helpers;
 using MoviesApi.Repositories;
 using System;
 using System.Collections.Generic;
@@ -20,8 +22,7 @@ namespace MoviesApi.Controllers
     {
         protected R repository;
         private readonly ILogger<ControllerCrudBase<T, R>> logger;
-      
-
+        
         public ControllerCrudBase(R repository, ILogger<ControllerCrudBase<T, R>> logger)
         {
             this.repository = repository;
@@ -30,10 +31,12 @@ namespace MoviesApi.Controllers
 
 
         [HttpGet]
-        public virtual async Task<ActionResult<List<T>>> Get()
+        public  async Task<ActionResult<List<T>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
+            var queryable = repository.GetAll().AsQueryable();
+            await HttpContext.InsertParametersPaginationInHeader(queryable);
 
-            return await repository.ListAll();
+            return await repository.ListAll(paginationDTO);
         }
         
         [HttpGet("{id:int}")]
@@ -60,14 +63,35 @@ namespace MoviesApi.Controllers
         }
 
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id}")]
         public virtual async Task<ActionResult<T>> Put([FromRoute] int id , [FromBody] T entity)
         {
+           if (id != entity.Id)
+            {
+                return BadRequest();
+            }
 
-            return entity;
+            T updatedEntity = await repository.Update(entity);
+         
+            if (updatedEntity == null)
+            {
+                return NotFound();
+            }
+
+            return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
         }
 
+        [HttpDelete ("{id:int}")]
+        public async Task<ActionResult<T>> Delete ([FromRoute] int id)
+        {
+            var deletedEntity = await repository.Delete(id);
 
+            if (deletedEntity == null)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
 
     }
 }

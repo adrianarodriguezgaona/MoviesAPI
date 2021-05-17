@@ -8,11 +8,18 @@ using System.Threading.Tasks;
 
 namespace MoviesApi.Repositories
 {
-    public class GenreRepository : BaseRepository<Genre>
+    public class GenreRepository : MappingRepository<Genre>
     {
-        public GenreRepository(ApplicationDbContext context): base(context)
+        public GenreRepository(ApplicationDbContext context, IMapper mapper): base(context, mapper)
         {
 
+        }
+
+        public virtual async Task<Genre> AddDTO(GenreCreationDTO genreCreationDTO)
+        {
+            var genre = _mapper.Map<Genre>(genreCreationDTO);
+
+            return await Add(genre);
         }
 
     }
