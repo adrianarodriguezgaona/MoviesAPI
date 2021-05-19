@@ -27,10 +27,32 @@ namespace MoviesApi.Controllers
         [Route("PostActor")]
 
         public async Task<ActionResult> PostActor([FromForm] ActorCreationDTO actorCreationDTO)
-        
+
         {
             await repository.AddDTO(actorCreationDTO);
 
-            return NoContent();        
+            return NoContent();
+        }
+
+        [HttpPut]
+        [Route("EditActor/{id:int}")]
+
+        public async Task<ActionResult> EditActor([FromRoute] int id, [FromForm] ActorCreationDTO actorCreationDTO)
+
+        {
+            await repository.EditDTO(id, actorCreationDTO);
+
+            return NoContent();
+        }
+
+        [HttpDelete]
+        [Route("DeleteActor/{id:int}")]
+
+        public async Task<ActionResult> DeleteActor ([FromRoute] int id)
+        {
+            await repository.DeleteActor(id);
+
+            return NoContent();          
+        }
     }
 }

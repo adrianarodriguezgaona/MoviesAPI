@@ -32,6 +32,7 @@ namespace MoviesApi.Repositories
         public async Task<Actor> EditDTO(int id, ActorCreationDTO actorCreationDTO)
         {
             var editedActor = await GetById(id);
+            var picture = editedActor.Picture;
 
             editedActor = _mapper.Map(actorCreationDTO, editedActor);
 
@@ -39,10 +40,23 @@ namespace MoviesApi.Repositories
             {
                 editedActor.Picture = await fileStorageService.EditFile(containerName, actorCreationDTO.Picture, editedActor.Picture);
             }
+            else
+            {
+                editedActor.Picture = picture;
+            }
 
             await applicationDb.SaveChangesAsync();
 
             return editedActor;
+        }
+
+        public async Task<Actor>DeleteActor(int id)
+        {
+            var actor = await Delete(id);
+
+            await fileStorageService.DeleteFile(actor.Picture, containerName);
+
+            return actor;
         }
     }
 }

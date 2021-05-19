@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -9,6 +10,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MoviesApi.Helpers;
 using MoviesApi.Repositories;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,9 +32,13 @@ namespace MoviesApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
+            sqlOptions => sqlOptions.UseNetTopologySuite()));
             services.AddScoped<GenreRepository>();
             services.AddScoped<ActorRepository>();
+            services.AddScoped<MovieTheaterRepository>();
+
+           
 
             services.AddCors(options =>
             {
@@ -44,6 +51,15 @@ namespace MoviesApi
             });
 
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddSingleton(provider => new MapperConfiguration(config =>
+            {
+                var geometryFactory = provider.GetRequiredService<GeometryFactory>();
+                config.AddProfile(new AutoMapperProfiles(geometryFactory));
+            }).CreateMapper());
+            services.AddSingleton<GeometryFactory>(NtsGeometryServices
+               .Instance.CreateGeometryFactory(srid: 4326));
+
             services.AddScoped<IFileStorageService, AzureStorageService>();
 
             services.AddControllers();
