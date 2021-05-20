@@ -46,7 +46,12 @@ namespace MoviesApi.Controllers
             return NoContent();
         }
 
-
+        [HttpPut ("EditMovieTheater/{id:int}")]
+        public async Task<ActionResult>PutMovieTheater ([FromRoute] int id, MovieTheaterCreationDTO movieTheaterCreationDTO)
+        {
+            await repository.UpdateMovieTheater(id, movieTheaterCreationDTO);
+            return NoContent();
+        }
 
 
     }

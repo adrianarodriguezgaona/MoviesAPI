@@ -7,6 +7,7 @@ namespace MoviesApi.Entities
 {
     public class Genre : EntityBase
     {
-       
+        public List<Movie> Movies { get; set; }
+
     }
 }

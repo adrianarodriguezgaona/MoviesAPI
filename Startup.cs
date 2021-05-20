@@ -37,8 +37,7 @@ namespace MoviesApi
             services.AddScoped<GenreRepository>();
             services.AddScoped<ActorRepository>();
             services.AddScoped<MovieTheaterRepository>();
-
-           
+            services.AddScoped<MovieRepository>();           
 
             services.AddCors(options =>
             {
