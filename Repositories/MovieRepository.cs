@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using MoviesApi.DTOs;
 using MoviesApi.Entities;
 using MoviesApi.Helpers;
@@ -17,6 +18,17 @@ namespace MoviesApi.Repositories
         public MovieRepository(ApplicationDbContext applicationDbContext, IMapper mapper, IFileStorageService fileStorageService) : base (applicationDbContext, mapper)
         {
             this.fileStorageService = fileStorageService;
+        }
+
+        public async Task<MoviePostGetDTO> AddGet()
+        {
+            var movieTheaters = await applicationDb.MovieTheaters.OrderBy(mt => mt.Name).ToListAsync();
+            var genres = await applicationDb.Genres.OrderBy(g => g.Name).ToListAsync();
+
+            var movieTheatersDTO = _mapper.Map<List<MovieTheaterDTO>>(movieTheaters);
+            var genresDTO = _mapper.Map<List<GenreDTO>>(genres);
+
+            return new MoviePostGetDTO() { Genres = genresDTO, MovieTheaters = movieTheatersDTO };
         }
 
         public virtual async Task<Movie> AddDTO(MovieCreationDTO movieCreationDTO)

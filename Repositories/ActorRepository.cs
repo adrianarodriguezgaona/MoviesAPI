@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using MoviesApi.DTOs;
 using MoviesApi.Entities;
 using MoviesApi.Helpers;
@@ -29,6 +30,16 @@ namespace MoviesApi.Repositories
             return await Add(actor);
         }
 
+        public async Task<List<ActorsMovieDTO>> SearchByName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) { return new List<ActorsMovieDTO>(); }
+            return  await applicationDb.Actors
+                .Where(x => x.Name.Contains(name))
+                .OrderBy(x => x.Name)
+                .Select(x => _mapper.Map<ActorsMovieDTO>(x))
+                .Take(5)
+                .ToListAsync();            
+        }
         public async Task<Actor> EditDTO(int id, ActorCreationDTO actorCreationDTO)
         {
             var editedActor = await GetById(id);

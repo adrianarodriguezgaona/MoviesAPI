@@ -34,6 +34,12 @@ namespace MoviesApi.Controllers
             return NoContent();
         }
 
+        [HttpPost("searchByName")]
+        public async Task<ActionResult<List<ActorsMovieDTO>>> SearchByName([FromBody] string name)
+        {
+            return await repository.SearchByName(name);
+        }
+
         [HttpPut]
         [Route("EditActor/{id:int}")]
 

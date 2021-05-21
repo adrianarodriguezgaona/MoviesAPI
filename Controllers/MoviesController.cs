@@ -20,6 +20,12 @@ namespace MoviesApi.Controllers
 
         }
 
+        [HttpGet("PostGet")]
+        public async Task<ActionResult<MoviePostGetDTO>> PostGet()
+        {
+            return await repository.AddGet();
+        }
+
         [HttpPost]
         [Route("PostMovie")]
 

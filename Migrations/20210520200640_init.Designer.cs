@@ -11,8 +11,8 @@ using NetTopologySuite.Geometries;
 namespace MoviesApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210519154141_MovieAndFriends")]
-    partial class MovieAndFriends
+    [Migration("20210520200640_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -119,11 +119,6 @@ namespace MoviesApi.Migrations
                     b.Property<string>("Summary")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(75)
-                        .HasColumnType("nvarchar(75)");
-
                     b.Property<string>("Trailer")
                         .HasColumnType("nvarchar(max)");
 
@@ -207,13 +202,13 @@ namespace MoviesApi.Migrations
             modelBuilder.Entity("MoviesApi.Entities.MoviesActors", b =>
                 {
                     b.HasOne("MoviesApi.Entities.Actor", "Actor")
-                        .WithMany()
+                        .WithMany("MoviesActors")
                         .HasForeignKey("ActorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MoviesApi.Entities.Movie", "Movie")
-                        .WithMany()
+                        .WithMany("MoviesActors")
                         .HasForeignKey("MovieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -221,6 +216,16 @@ namespace MoviesApi.Migrations
                     b.Navigation("Actor");
 
                     b.Navigation("Movie");
+                });
+
+            modelBuilder.Entity("MoviesApi.Entities.Actor", b =>
+                {
+                    b.Navigation("MoviesActors");
+                });
+
+            modelBuilder.Entity("MoviesApi.Entities.Movie", b =>
+                {
+                    b.Navigation("MoviesActors");
                 });
 #pragma warning restore 612, 618
         }

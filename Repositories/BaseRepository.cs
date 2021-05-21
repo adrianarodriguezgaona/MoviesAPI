@@ -66,6 +66,7 @@ namespace MoviesApi.Repositories
            return await applicationDb.Set<T>().FirstOrDefaultAsync(t => t.Id == id);           
         }
 
+       
         public async Task<List<T>> ListAll(PaginationDTO paginationDTO)
         {
             return await GetAll().OrderBy(e => e.Name).Paginate(paginationDTO).ToListAsync();

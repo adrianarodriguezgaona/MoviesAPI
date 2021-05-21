@@ -32,6 +32,8 @@ namespace MoviesApi.Helpers
                 .ForMember(x => x.Genres, options => options.MapFrom(MapMoviesGenres))
                 .ForMember(x => x.MovieTheaters, options => options.MapFrom(MapMovieTheatersMovies))
                 .ForMember(x => x.MoviesActors, options => options.MapFrom(MapMoviesActors));
+
+            CreateMap<Actor, ActorsMovieDTO>().ReverseMap();
         }
 
         private List<Genre> MapMoviesGenres(MovieCreationDTO movieCreationDTO, Movie movie)
@@ -41,7 +43,7 @@ namespace MoviesApi.Helpers
 
             foreach (var id in movieCreationDTO.GenresIds)
             {
-                result.Add(new Genre() { Id = id });
+                result.Add(new Genre() {Id = id});
             }
 
             return result;
