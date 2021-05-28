@@ -26,13 +26,31 @@ namespace MoviesApi.Controllers
             return await repository.AddGet();
         }
 
+        [HttpGet("GetById/{id:int}")]
+        public async Task<ActionResult<MovieDTO>> GetDTO (int id)
+        {
+            var dto = await repository.GetDTOById(id);
+            if(dto == null)
+            {
+                return NotFound();
+            }
+
+            return dto;
+        }
+
         [HttpPost]
         [Route("PostMovie")]
 
-        public async Task<ActionResult> PostActor([FromForm] MovieCreationDTO movieCreationDTO)
-
+        public async Task<ActionResult> PostMovie([FromForm] MovieCreationDTO movieCreationDTO)
         {
-            await repository.AddDTO(movieCreationDTO);
+            try
+            {
+                await repository.AddDTO(movieCreationDTO);
+            }
+            catch
+            {
+                return BadRequest();
+            }
 
             return NoContent();
         }

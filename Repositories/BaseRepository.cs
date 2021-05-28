@@ -25,12 +25,27 @@ namespace MoviesApi.Repositories
             {
                 await applicationDb.SaveChangesAsync();
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                Console.WriteLine("{0} Exception caught.", ex);
             }
             return entity;
         }
+
+        public virtual async Task<T> Attach(T entity)
+        {
+            applicationDb.Set<T>().Attach(entity);
+            try
+            {
+                await applicationDb.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("{0} Exception caught.", ex);
+            }
+            return entity;
+        }
+
 
         public async Task<T> Delete(T entity)
         {

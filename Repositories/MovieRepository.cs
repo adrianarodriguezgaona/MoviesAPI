@@ -31,9 +31,46 @@ namespace MoviesApi.Repositories
             return new MoviePostGetDTO() { Genres = genresDTO, MovieTheaters = movieTheatersDTO };
         }
 
+        public async Task<MovieDTO> GetDTOById(int id)
+        {
+            var movie = await applicationDb.Movies
+                .Include(x => x.Genres)
+                .Include(x => x.MovieTheaters)
+                .Include(x => x.MoviesActors).ThenInclude(x => x.Actor)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (movie == null)
+            {
+                return null;
+            }
+
+            var dto = _mapper.Map<MovieDTO>(movie);
+            dto.Actors = dto.Actors.OrderBy(x => x.Order).ToList();
+
+            return dto;
+        }
         public virtual async Task<Movie> AddDTO(MovieCreationDTO movieCreationDTO)
         {
             var movie = _mapper.Map<Movie>(movieCreationDTO);
+
+            // another way without automapper (ignored in AutomapperProfile)
+            //if(movieCreationDTO.GenresIds.Count > 0)
+            //{
+            //    var genres =  applicationDb.Genres.ToList();
+            //    foreach(var id in movieCreationDTO.GenresIds)
+            //    {
+            //        movie.Genres.Add(genres.First(g => g.Id == id));
+            //    }
+            //}
+
+            //if(movieCreationDTO.MovieTheatersIds.Count > 0)
+            //{
+            //    var movieTheaters = applicationDb.MovieTheaters.ToList();
+            //    foreach (var id in movieCreationDTO.MovieTheatersIds)
+            //    {
+            //        movie.MovieTheaters.Add(movieTheaters.First(mt => mt.Id == id));
+            //    }
+            //}
 
             if (movieCreationDTO.Poster != null)
             {
@@ -42,7 +79,7 @@ namespace MoviesApi.Repositories
 
             AnnotateActorsOrder(movie);
 
-            return await Add(movie);
+            return await Attach(movie);
         }
 
         private void AnnotateActorsOrder (Movie movie)
