@@ -92,7 +92,7 @@ namespace MoviesApi.Repositories
             return await GetAll().OrderBy(e => e.Name).ToListAsync();
         }
 
-        public async Task<T> Update(T entity)
+        public virtual async Task<T> Update(T entity)
         {
             applicationDb.Entry(entity).State = EntityState.Modified;
             try
