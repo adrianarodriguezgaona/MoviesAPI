@@ -236,6 +236,18 @@ namespace MoviesApi.Repositories
             return _mapper.Map<List<MovieDTO>>(movies);
         }
 
+        public async Task<Movie> DeleteMovie(int id)
+        {
+            var movie = await GetById(id);
+            if (movie == null)
+            {
+                return null;
+            }
+            await Delete(movie);
 
+            await fileStorageService.DeleteFile(movie.Poster, containerName);
+
+            return movie;          
+        }
     }
 }

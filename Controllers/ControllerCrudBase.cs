@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MoviesApi.DTOs;
 using MoviesApi.Entities;
+using MoviesApi.Filters;
 using MoviesApi.Helpers;
 using MoviesApi.Repositories;
 using System;
@@ -17,20 +18,21 @@ namespace MoviesApi.Controllers
     public class ControllerCrudBase<T, R> : ControllerBase
         where T:EntityBase
         where R:BaseRepository<T>
-
         
     {
         protected R repository;
-        private readonly ILogger<ControllerCrudBase<T, R>> logger;
+        protected ILogger<ControllerBase> logger;
         
-        public ControllerCrudBase(R repository, ILogger<ControllerCrudBase<T, R>> logger)
+        public ControllerCrudBase(R repository, ILogger<ControllerBase> logger)
         {
             this.repository = repository;
             this.logger = logger;           
         }
 
-
         [HttpGet]
+        [ResponseCache(Duration = 60)]
+        [ServiceFilter(typeof(MyActionFilter))]
+
         public  async Task<ActionResult<List<T>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
             var queryable = repository.GetAll().AsQueryable();
@@ -46,7 +48,7 @@ namespace MoviesApi.Controllers
 
             if (entity == null)
             {
-                logger.LogWarning($"{entity} with Id {id} not found");
+                logger.LogWarning($"Error: the entity with Id {id} is not found");
                 return NotFound();
             }
 

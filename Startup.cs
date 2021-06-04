@@ -1,13 +1,17 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using MoviesApi.Filters;
 using MoviesApi.Helpers;
 using MoviesApi.Repositories;
 using NetTopologySuite;
@@ -15,6 +19,7 @@ using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MoviesApi
@@ -37,7 +42,8 @@ namespace MoviesApi
             services.AddScoped<GenreRepository>();
             services.AddScoped<ActorRepository>();
             services.AddScoped<MovieTheaterRepository>();
-            services.AddScoped<MovieRepository>();           
+            services.AddScoped<MovieRepository>();
+            services.AddTransient<MyActionFilter>();
 
             services.AddCors(options =>
             {
@@ -60,9 +66,33 @@ namespace MoviesApi
                .Instance.CreateGeometryFactory(srid: 4326));
 
             services.AddScoped<IFileStorageService, AzureStorageService>();
+            services.AddHttpContextAccessor();
 
-            services.AddControllers();
+            
 
+            services.AddControllers(options =>
+            {  //to apply MyExceptionFilter globaly
+                options.Filters.Add(typeof(MyExceptionFilter));
+            });
+            services.AddResponseCaching();
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => 
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(Configuration["keyjwt"])),
+                    ClockSkew = TimeSpan.Zero
+                };            
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -77,7 +107,11 @@ namespace MoviesApi
 
             app.UseRouting();
 
+            app.UseResponseCaching();
+
             app.UseCors();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

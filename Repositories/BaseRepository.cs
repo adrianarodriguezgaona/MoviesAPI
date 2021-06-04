@@ -54,21 +54,21 @@ namespace MoviesApi.Repositories
             {
                 await applicationDb.SaveChangesAsync();
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                Console.WriteLine("{0} Exception caught.", ex);
             }
             return entity;
         }
 
         public async Task<T> Delete(int id)
-        {
-            var entity = await GetById(id);
+        { var entity = await GetById(id);
             if (entity == null)
             {
                 return null;
             }
             return await Delete(entity);
+           
         }
 
         public virtual IQueryable<T> GetAll()
