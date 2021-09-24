@@ -14,7 +14,7 @@ namespace MoviesApi.Repositories
         public MappingRepository(ApplicationDbContext context, IMapper mapper): base (context)
         {
             _mapper = mapper;
-        }
+         }
 
     }
 }

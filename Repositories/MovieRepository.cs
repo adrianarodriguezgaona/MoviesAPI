@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MoviesApi.DTOs;
 using MoviesApi.Entities;
@@ -15,11 +16,14 @@ namespace MoviesApi.Repositories
     public class MovieRepository :MappingRepository<Movie>
     {
         private IFileStorageService fileStorageService;
+        private readonly UserManager<IdentityUser> userManager;
         private string containerName = "movies";
+        private static HttpContext _httpContext => new HttpContextAccessor().HttpContext;
 
-        public MovieRepository(ApplicationDbContext applicationDbContext, IMapper mapper, IFileStorageService fileStorageService) : base (applicationDbContext, mapper)
+        public MovieRepository(ApplicationDbContext applicationDbContext, IMapper mapper, IFileStorageService fileStorageService, UserManager<IdentityUser> userManager) : base (applicationDbContext, mapper)
         {
             this.fileStorageService = fileStorageService;
+            this.userManager = userManager;
         }
 
         public async Task<MoviePostGetDTO> AddGet()
@@ -46,7 +50,33 @@ namespace MoviesApi.Repositories
                 return null;
             }
 
+            var averageVote = 0.0;
+            int userVote = 0;
+
+            if( await applicationDb.Ratings.AnyAsync(x => x.MovieId == id))
+            {
+                averageVote = await applicationDb.Ratings.Where(x => x.MovieId == id)
+                    .AverageAsync(x => x.Rate);
+                
+
+                if (_httpContext.User.Identity.IsAuthenticated)
+                {
+                    var email = _httpContext.User.Claims.FirstOrDefault(x => x.Type == "email").Value;
+                    var user = await userManager.FindByEmailAsync(email);
+                    string userId = user.Id;
+
+                    Rating ratingDb = await applicationDb.Ratings.FirstOrDefaultAsync(x => x.MovieId == id && x.UserId == userId);
+
+                    if (ratingDb != null)
+                    {
+                        userVote = ratingDb.Rate;
+                    }
+                }
+            }
+
             var dto = _mapper.Map<MovieDTO>(movie);
+            dto.AverageVote = averageVote;
+            dto.UserVote = userVote;
             dto.Actors = dto.Actors.OrderBy(x => x.Order).ToList();
 
             return dto;

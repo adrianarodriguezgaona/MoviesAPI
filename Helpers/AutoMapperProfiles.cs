@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using MoviesApi.DTOs;
 using MoviesApi.Entities;
 using NetTopologySuite.Geometries;
@@ -41,6 +42,8 @@ namespace MoviesApi.Helpers
                 .ForMember(x => x.Actors, options => options.MapFrom(MapMovieActor));
 
             CreateMap<Actor, ActorsMovieDTO>().ReverseMap();
+
+            CreateMap<IdentityUser, UserDTO>();
         }
 
         private List<MovieTheaterDTO> MapMovieMovietheater(Movie movie, MovieDTO movieDTO)

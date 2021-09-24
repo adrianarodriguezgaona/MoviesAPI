@@ -56,7 +56,7 @@ namespace MoviesApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post([FromBody] T entity)
+        public virtual async Task<ActionResult> Post([FromBody] T entity)
 
         {
             await repository.Add(entity);

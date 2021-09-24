@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MoviesApi.Validation;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -8,6 +9,10 @@ namespace MoviesApi.Entities
 {
     public class Movie: EntityBase
     {
+        [Required(ErrorMessage = "The field with name {0} is required")]
+        [StringLength(60)]
+        [FirstLetterUppercase]
+        public string Name { get; set; }
         public string Summary { get; set; }
         public string Trailer { get; set; }
         public bool InTheaters { get; set; }

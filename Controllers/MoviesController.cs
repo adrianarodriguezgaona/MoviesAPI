@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MoviesApi.DTOs;
@@ -14,6 +16,7 @@ namespace MoviesApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
     public class MoviesController : ControllerCrudBase<Movie,MovieRepository>
     {
         public MoviesController(MovieRepository repository, ILogger<MoviesController> logger): base ( repository, logger)
@@ -28,12 +31,14 @@ namespace MoviesApi.Controllers
         }
 
         [HttpGet("GetMovies")]
+        [AllowAnonymous]
         public async Task<ActionResult<HomeDTO>> GetMovies()
         {
             return await repository.GetHome();           
         }
 
         [HttpGet("GetById/{id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<MovieDTO>> GetDTO (int id)
         {
             var dto = await repository.GetDTOById(id);
@@ -48,6 +53,8 @@ namespace MoviesApi.Controllers
         [HttpGet ("PutGetById/{id:int}")]
         public async Task<ActionResult<MoviePutGetDTO>> PutGet(int id)
         {
+            bool isAuthenticated = HttpContext.User.Identity.IsAuthenticated;
+            string email = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "email").Value;
             var moviePutGetDto = await repository.PutGet(id);
             if (moviePutGetDto == null)
             {
@@ -70,6 +77,7 @@ namespace MoviesApi.Controllers
         }
 
         [HttpGet ("Filter")]
+        [AllowAnonymous]
         public async Task<ActionResult<List<MovieDTO>>> Filter ([FromQuery] FilterMovieDTO filterMovieDTO)
         {
             var moviesQueryable = await repository.Filter(filterMovieDTO);

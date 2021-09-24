@@ -18,6 +18,7 @@ using NetTopologySuite;
 using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +29,7 @@ namespace MoviesApi
     {
         public Startup(IConfiguration configuration)
         {
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             Configuration = configuration;
         }
 
@@ -43,6 +45,7 @@ namespace MoviesApi
             services.AddScoped<ActorRepository>();
             services.AddScoped<MovieTheaterRepository>();
             services.AddScoped<MovieRepository>();
+            services.AddScoped<RatingsRepository>();
             services.AddTransient<MyActionFilter>();
 
             services.AddCors(options =>
@@ -92,6 +95,11 @@ namespace MoviesApi
                         Encoding.UTF8.GetBytes(Configuration["keyjwt"])),
                     ClockSkew = TimeSpan.Zero
                 };            
+            });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("IsAdmin", policy => policy.RequireClaim("role", "admin"));
             });
         }
 
